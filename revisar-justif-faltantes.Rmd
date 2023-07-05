@@ -1,0 +1,59 @@
+---
+title: "Buscar alumnos faltantes en nueva lista de justificados"
+author: "Rodolfo Carvajal"
+output:
+  html_notebook
+---
+
+
+Este notebook revisa qué alumnos justificados de nueva lista (descargada recientemente desde WebC) no están en la antigua lista de justificados.
+
+
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(lubridate)
+```
+
+
+```{r}
+vieja_lista <- read_delim(clipboard())
+```
+
+```{r}
+nueva_lista <- read_excel("Justificaciones (1).xlsx")
+```
+
+```{r}
+vieja_lista %>% 
+  glimpse()
+```
+
+
+```{r}
+vieja_lista <- vieja_lista %>%
+  mutate(FechaInicial = mdy(FechaInicial),
+         FechaFinal = mdy(FechaFinal))
+
+vieja_lista
+```
+
+
+
+```{r}
+nueva_lista <- nueva_lista %>%
+  mutate(FechaInicial = ymd(FechaInicial),
+         FechaFinal = ymd(FechaFinal))
+```
+
+
+
+```{r}
+nueva_lista %>%
+  left_join(vieja_lista,
+            by = c("FechaInicial", "FechaFinal", "Alumno")) %>% 
+  filter(is.na(Rut.y)) #%>% 
+  clipr::write_clip()
+```
+
